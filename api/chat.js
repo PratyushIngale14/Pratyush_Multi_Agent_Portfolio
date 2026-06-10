@@ -112,7 +112,7 @@ module.exports = async function handler(req, res) {
         }
 
         const data = await groqRes.json();
-        const reply = data.choices ? .[0] ? .message ? .content ? .trim();
+        const reply = data.choices?.[0]?.message?.content?.trim();
         if (!reply) return res.status(502).json({ error: 'empty_reply' });
 
         return res.status(200).json({ reply });
