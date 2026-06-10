@@ -73,51 +73,51 @@ PHILOSOPHY
 `;
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
 
-  const key = process.env.GROQ_API_KEY;
-  if (!key) return res.status(500).json({ error: 'no_api_key' });
+    const key = process.env.GROQ_API_KEY;
+    if (!key) return res.status(500).json({ error: 'no_api_key' });
 
-  const { message } = req.body || {};
-  if (!message || typeof message !== 'string' || message.length > 600) {
-    return res.status(400).json({ error: 'bad_message' });
-  }
-
-  try {
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 400,
-        temperature: 0.4,
-        messages: [
-          { role: 'system', content: PROFILE },
-          { role: 'user', content: message },
-        ],
-      }),
-    });
-
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      console.error('Groq error:', groqRes.status, errText);
-      return res.status(502).json({ error: 'llm_error' });
+    const { message } = req.body || {};
+    if (!message || typeof message !== 'string' || message.length > 600) {
+        return res.status(400).json({ error: 'bad_message' });
     }
 
-    const data = await groqRes.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
-    if (!reply) return res.status(502).json({ error: 'empty_reply' });
+    try {
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                max_tokens: 400,
+                temperature: 0.4,
+                messages: [
+                    { role: 'system', content: PROFILE },
+                    { role: 'user', content: message },
+                ],
+            }),
+        });
 
-    return res.status(200).json({ reply });
-  } catch (e) {
-    console.error('Chat handler error:', e);
-    return res.status(500).json({ error: 'server_error' });
-  }
+        if (!groqRes.ok) {
+            const errText = await groqRes.text();
+            console.error('Groq error:', groqRes.status, errText);
+            return res.status(502).json({ error: 'llm_error' });
+        }
+
+        const data = await groqRes.json();
+        const reply = data.choices ? .[0] ? .message ? .content ? .trim();
+        if (!reply) return res.status(502).json({ error: 'empty_reply' });
+
+        return res.status(200).json({ reply });
+    } catch (e) {
+        console.error('Chat handler error:', e);
+        return res.status(500).json({ error: 'server_error' });
+    }
 }
